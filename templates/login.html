@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block head %}
+  <style>
+    .center-screen {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #def2f1; /* A light blue-green color, inspired by the ocean */
+    }
+    .form-container {
+        background-color: #3aa59c; /* A deeper green color, inspired by forest trees */
+        color: #fff; /* White color for contrast */
+        box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.3); /* A slight shadow to make the form stand out */
+        border-radius: 15px; /* A rounded border for a more friendly look */
+    }
+    .error-box {
+    background-color: #ed5050;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 8px;
+    }
+  </style>
+{% endblock %}
+  
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+
+  <div class="container-fluid">
+    <div class="row justify-content-center center-screen">
+        <div class="col-lg-3 col-md-6 col-sm-8 text-center form-container p-4">
+            <h2 class="mt-3">Login</h2>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="error-box">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form name="login" method="post" action="/login">
+                <div class="form-group mt-4">
+                    <input type="email" class="form-control" name="email" id="email" placeholder="Email">
+                </div>
+                <div class="form-group mt-4">
+                    <input type="password" class="form-control" name="password" id="password" placeholder="Password">
+                </div>
+                <div class="d-flex form-group form-check mt-4 justify-content-center">
+                    <div class = "mx-2">
+                        <input type="checkbox" class="form-check-input" name="remember" id="remember">
+                        <label class="form-check-label" for="remember">Remember me</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-light mt-4">Submit</button>
+                <p class="mt-3">Don't have an account? <a href="/signup" style="color: #c8f7f4;">Sign up</a> here!</p>
+
+            </form>
+        </div>
+    </div>
+  </div>
+{% endblock %}

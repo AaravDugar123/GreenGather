@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&family=Ysabeau+Infant:wght@200&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+{% block head %}
+    <style>
+        #findCleanups {
+        background-color: #3aa59c;
+        color: #fff;
+        box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.3);
+        border-radius: 15px;
+        padding-top: 1rem;
+        padding-right: 1.5rem;
+        padding-left: 1.5rem;
+        padding-bottom: 1.5rem;
+        margin-top: 2rem;
+        }
+        .monsterrat {
+            font-family: 'Ysabeau Infant', sans-serif;
+            font-size: 16px; /* Default font size */
+        }
+
+        @media (max-width: 768px) {
+            .monsterrat {
+                font-size: 14px; /* Adjusted font size for smaller screens */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .monsterrat {
+                font-size: 12px; /* Adjusted font size for even smaller screens */
+            }
+        }
+
+        .roboto {
+            font-family: 'Roboto', sans-serif;
+        }  
+        #map {
+        height: calc(175vh - 75px);
+        width: 100%;
+        padding: 2vh;
+        }
+        .form-container {
+            background-color: #3aa59c; /* A deeper green color, inspired by forest trees */
+            color: #fff; /* White color for contrast */
+            box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.3); /* A slight shadow to make the form stand out */
+            border-radius: 15px; /* A rounded border for a more friendly look */
+
+        }
+        .error-box {
+        background-color: #ed5050;
+        color: #ffffff;
+        padding: 10px;
+        border-radius: 8px;
+        }
+    </style>
+{% endblock %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid p-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <div class="form-container p-4 mt-4" sty>
+                <h1 class="h3 text-center">Create a cleanup</h1>
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="error-box d-flex justify-content-center">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+                <form name="login" method="post" action="/dashboard">
+                    <div class="form-group mt-1">
+                        <label for="address2">Address</label>
+                        <input id="address2" name="address2" type="text" class="form-control" required placeholder = "">
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="start-Time">Start-Time</label>
+                        <input id="start-Time" name="starttime" type="time" class="form-control" required placeholder="">
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="end-Time">End-Time</label>
+                        <input id="end-Time" name="endtime" type="time" class="form-control" required placeholder="">
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="date">Date</label>
+                        <div class="input-group">
+                            <input id="date" name="date" type="date" min="{{curdate}}" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" class = "form-control" required></textarea>
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="typeOfCleanup">Type of Cleanup</label>
+                        <select id="typeOfCleanup" name="typeOfCleanup" class="form-control" required>
+                            <option disabled selected value> -- select an option -- </option>
+                            <option value="beach">Beach Cleanup</option>
+                            <option value="park">Park Cleanup</option>
+                            <option value="street">Street Cleanup</option>
+                            <option value="trail">Trail Cleanup</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <input type="text" maxlength="25" name="othertypeoftrail" id="othertypeoftrail" class="form-control mt-1" placeholder="other" style="display: none;">
+                    <div class="form-group mt-3 text-center">
+                        <button type="submit" class="btn btn-light">Create</button>
+                    </div>
+                </form>
+            </div>
+            <div class="containe mb-4"> 
+                {% if curusercleanups %}
+                <div id="findCleanups">
+                    <h1 class=" h3 text-center mb-4">Cleanups you're signed up for</h1>
+                    {% for curusercleanup in curusercleanups %}
+                        <div class="card d-flex justify-content-center mb-4" style = "background-color:rgb(255, 255, 255);">
+                            <div  id="heading{{ curusercleanup.id }}" class = "mt-2">
+                                <h1 class=" monsterrat mb-2 text-center ">Cleanup at {{ curusercleanup.address}}</h1>            
+                                <h1 class=" monsterrat text-center">From {{curusercleanup.start_time }} to {{curusercleanup.end_time}}</h1>            
+                                <h1 class=" monsterrat mb-2 text-center">On {{curusercleanup.date}}</h1>            
+                                <div class="curusercleanupmoreinfo mt-3 mb-3" data-cleanup-id="{{ curusercleanup.id }}" hidden>
+                                    <p class="roboto text-center"><strong>Type of Cleanup:</strong> {{ curusercleanup.type }}</p>
+                                    <p class="roboto text-center"><strong>Amount of Signups:</strong> {{ curusercleanup.amountofsignups }}</p>
+                                    <p class="roboto text-center"><strong>Description:</strong> {{ curusercleanup.description }}</p>
+                                    <form action="/dashboard" method="post" name="leavecleanup{{ curusercleanup.id }}">
+                                        <button type="submit" name="leavecleanup{{ curusercleanup.id }}" class="btn btn-primary  mx-auto d-block">Leave Cleanup</button>
+                                    </form>
+                                </div>
+                                <div style = "width: 100%;" class = "d-flex justify-content-center mb-2"><button class="mx-auto showmoreinfobutton btn btn-secondary mb-" data-cleanup-id="{{ curusercleanup.id }}">Show More</button></div>
+                                        
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <!-- <label for="address">Find Cleanups Near:</label> -->
+            <div class="input-group">
+                <input id="address" type="text" class="form-control" placeholder="Find Cleanups Near">
+                <button id="search" class="btn btn-primary">Search</button>
+            </div>
+            <div id="map"></div>
+            <!-- <gmp-map center="{{ location['lat'] }},{{ location['lng'] }}" zoom="13" map-id="DEMO_MAP_ID"
+                id="main-map"><gmp-advanced-marker position="{{ location['lat'] }},{{ location['lng'] }}" title="string">
+                    <gmp-advanced-marker-content>
+                      <div id="popup">
+                        <h2>Hi</h2>
+                        <p>This is a popup message.</p>
+                      </div>
+                    </gmp-advanced-marker-content>
+                  </gmp-advanced-marker></gmp-map> -->
+        </div>
+    </div>
+</div>
+
+<!-- SECTION FOR INVISIBLE VARIABLES -->
+<div id="invis-vars" hidden>
+    <p1 name="{{ location['lat'] }}" id="lat" hidden>{{ lat }} </p1>
+    <p1 name="{{ location['lng'] }}" id="lng" hidden>{{ lng }}</p1>
+    <p1 name="{{ cleanups }}" id = "cleanups"></p1>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<!-- <script async src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap&libraries=maps,marker,places&v=beta"></script> -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ api_key}}&libraries=places"></script>
+<script>
+    
+    var map;
+    var typeOfCleanupSelect = document.getElementById("typeOfCleanup");
+    var othertypeoftrailInput = document.getElementById("othertypeoftrail");
+
+    typeOfCleanupSelect.addEventListener("change", function () {
+        if (typeOfCleanupSelect.value === "other") {
+            othertypeoftrailInput.style.display = "block";
+            othertypeoftrailInput.required = true;
+        } else {
+            othertypeoftrailInput.style.display = "none";
+            othertypeoftrailInput.required = false;
+        }
+    });
+
+    document.getElementById("address").addEventListener("keyup", function (event) {
+        event.preventDefault();
+        if (event.keyCode === 13) {
+            document.getElementById("search").click();
+            document.getElementById('address').value = "";
+        }
+    });
+
+    let address;
+    document.querySelector("#search").addEventListener("click", () => {
+        address = document.querySelector("#address").value;
+        console.log(address);
+        console.log(getCoords(address).then((data) => {
+            const lat = data.lat;
+            const lng = data.lng;
+            // mainMap.setAttribute("center", "" + lat + "," + lng);
+            map.setCenter(new google.maps.LatLng(lat, lng));
+            document.getElementById('address').value = "";
+        }));
+    });
+
+    async function getCoords(address) {
+        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key={{ api_key }}`);
+        const data = await response.json();
+        return data.results[0].geometry.location;
+    }
+
+    function initMap() {
+
+        var myLatLng = { lat: parseFloat(document.getElementById("lat").getAttribute("name")), lng: parseFloat(document.getElementById("lng").getAttribute("name")) }; // San Francisco coordinate
+        
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: myLatLng,
+        zoom: 13
+      });
+      console.log(document.getElementById("cleanups").getAttribute("name"));
+      const cleanups = JSON.parse(document.getElementById("cleanups").getAttribute("name"));
+      
+      for (const cleanup of cleanups) {
+        
+    var marker = new google.maps.Marker({
+        position: { lat: parseFloat(cleanup.lat), lng: parseFloat(cleanup.lng) },
+        map: map,
+        title: 'Marker',
+        icon: {
+            url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+            scaledSize: new google.maps.Size(41, 50) // size of the icon is 1.75 times bigger than original (20*1.75, 32*1.75)
+        }
+    });
+
+  var contentString = `<div class="card d-flex flex-column align-items-center justify-content-center">
+  <div class="card-header d-flex align-items-center justify-content-center w-100">
+    <h5 class="card-title mt-2">Cleanup Details</h5>
+  </div>
+  <div class="card-body text-center">
+    <p><strong>Type of Cleanup:</strong> ${cleanup.type}</p>
+    <p><strong>Address:</strong> ${cleanup.address}</p>
+    <p><strong>Date:</strong> ${cleanup.date}</p>
+    <p><strong>Timeframe:</strong> ${cleanup.start_time} - ${cleanup.end_time}</p>
+    <p><strong>Amount of Signups:</strong> ${cleanup.amountofsignups}</p>
+    <p><strong>Description:</strong> ${cleanup.description}</p>
+    <form action="/dashboard" name="joincleanup${cleanup.id}" method="post">
+      <button class="formbutton2 btn btn-primary btn-block" type="submit" name="joincleanup${cleanup.id}">Join this Cleanup!</button>
+    </form>
+  </div>
+</div>
+`;
+
+  var infowindow = new google.maps.InfoWindow({
+    content: contentString
+  });
+
+  // Use a closure to capture the current marker and infowindow in the event listener
+  marker.addListener('click', (function(marker, infowindow, contentString) {
+    return function() {
+      infowindow.setContent(contentString);
+      infowindow.open(map, marker);
+    };
+  })(marker, infowindow, contentString));
+}
+
+        console.log('Maps JavaScript API loaded.');
+        const input = document.getElementById('address');
+        const autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry || !place.geometry.location) {
+                console.log('No location data found for the selected place.');
+                return;
+            }
+        });
+        const input2 = document.getElementById('address2');
+        const autocomplete2 = new google.maps.places.Autocomplete(input2);
+        autocomplete2.addListener('place_changed', () => {
+            const place2 = autocomplete2.getPlace();
+            if (!place2.geometry || !place2.geometry.location) {
+                console.log('No location data found for the selected place.');
+                return;
+            }
+        });
+    }
+</script>
+<script>
+    function formatTime(time) {
+    const [hours, minutes] = time.split(':');
+    let period = 'AM';
+
+    if (parseInt(hours) >= 12) {
+      period = 'PM';
+    }
+
+    const formattedHours = (parseInt(hours) % 12) || 12;
+    return `${formattedHours}:${minutes} ${period}`;
+  }
+</script>
+<script>
+    // Function to toggle more information
+    function toggleMoreInfo(cleanupId) {
+      var moreInfoDiv = document.querySelector(`.curusercleanupmoreinfo[data-cleanup-id="${cleanupId}"]`);
+      var showMoreButton = document.querySelector(`.showmoreinfobutton[data-cleanup-id="${cleanupId}"]`);
+  
+      if (moreInfoDiv.hidden) {
+        moreInfoDiv.removeAttribute("hidden");
+        showMoreButton.innerHTML = "Show Less";
+      } else {
+        moreInfoDiv.setAttribute("hidden", "hidden");
+        showMoreButton.innerHTML = "Show More";
+      }
+    }
+  
+    // Event delegation for Show More button clicks
+    document.addEventListener("click", function(event) {
+      if (event.target.classList.contains("showmoreinfobutton")) {
+        var cleanupId = event.target.getAttribute("data-cleanup-id");
+        toggleMoreInfo(cleanupId);
+      }
+    });
+  
+    // Event delegation for Leave Cleanup button clicks
+    document.addEventListener("click", function(event) {
+      if (event.target.classList.contains("leavecleanupbutton")) {
+        var cleanupId = event.target.getAttribute("data-cleanup-id");
+        // Perform the desired action for leaving the cleanup using the cleanupId
+      }
+    });
+  </script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{api_key}}&libraries=places&callback=initMap"></script>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block head %}
+<style>
+  .center-screen {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #def2f1;
+  }
+  .form-container {
+    background-color: #3aa59c !important;
+    padding: 2rem !important;
+    border-radius: 15px !important;
+    color: #fff !important;
+    max-width: 800px !important;
+    width: 100% !important;
+  }
+  .form-group {
+    margin-bottom: 1.5rem !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap; /* Add this to allow the inputs to wrap onto the next line */
+  }
+  .form-group input[type='text'], .form-group input[type='password'], .form-group input[type='tel']{
+    width: 48% !important; 
+    padding: 12px 20px !important;
+    margin: 8px 0 !important;
+    display: inline-block !important;
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    box-sizing: border-box !important;
+  }
+  .form-group input[type='email']{
+    width: 100% !important;
+    padding: 12px 20px !important;
+    margin: 8px 0 !important;
+    display: inline-block !important;
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    box-sizing: border-box !important;
+  }
+  .error-box {
+    background-color: #ed5050;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 1vh;
+    }
+
+  @media (max-width: 768px) {
+    .form-group input[type='text'], .form-group input[type='password'], .form-group input[type='tel']{
+        width: 100% !important; /* On smaller screens, make the input fields take up the full width */
+    }
+  }
+</style>
+{% endblock %}
+{% block title %}Sign Up{% endblock %}
+{% block body %}
+  <div class="container-fluid center-screen">
+    <div class="row justify-content-center">
+      <div class="form-container">
+        <div class="d-flex justify-content-center"><h2>Sign Up</h2></div>
+        {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="error-box d-flex justify-content-center">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        <form name="signup" method="post" action="/signup">
+            <div class="form-group">
+              <input type="text" name="fname" id="fname" maxlength="50" placeholder="First Name" required>
+              <input type="text" name="lname" id="lname" maxlength="50" placeholder="Last Name" required>
+            </div>
+            <div class="form-group">
+              <input type="email" name="email" id="email" maxlength="100" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+            <input id="phone" type="tel" name="phone" placeholder="Phone Number" required>
+              <input type="text" pattern="[0-9]{5}" title="Five digit zip code" placeholder="Zip Code" maxlength="5" name="zipcode" required>
+            </div>
+            <div class="form-group">
+              <input type="password" name="password" id="password" placeholder="Password" pattern="^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&()])[A-Za-z\d@$!%*?&()]{8,}$" title="Password must contain at least 8 characters, 1 symbol, and 1 lowercase letter" required>
+              <input type="password" name="password2" id="password2" placeholder="Confirm Password" maxlength="64" required>
+            </div>
+            <div class = "d-flex justify-content-center">
+            <button type="submit" class="btn btn-light mt-4">Sign Up</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block script %} 
+<!-- <script>
+  const phoneInputField = document.querySelector("#phone");
+  const phoneInput = window.intlTelInput(phoneInputField, {
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+  });
+</script> -->
+{% endblock %}
